@@ -18,7 +18,7 @@
 
   function menuAim(element, options) {
 
-    const rowSelector = options.rowSelector || 'li';
+    const rowSelector = options.rowSelector || '.menu-aim-item';
     const delay = options.delay || 250;
     const submenuDirection = options.submenuDirection || 'right';
     const activateCallback = options.activateCallback || noop;
