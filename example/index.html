@@ -24,15 +24,20 @@
         position: relative;
         width: 300px;
       }
-      .menu-aim__item a {
+      .menu-aim a {
         display: block;
         color: blue;
       }
-      .menu-aim__item a:hover,
+      .menu-aim a:hover,
       .menu-aim__item--active .menu-aim__item-name {
         color: white;
         background: blue;
       }
+      .menu-aim--is-delaying .menu-aim__item-name:hover {
+        color: blue;
+        background: none;
+      }
+
       .menu-aim__item-submenu {
         display: none;
         position: absolute;
