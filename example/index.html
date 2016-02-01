@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>menu-aim</title>
+    <meta charset="utf-8">
+    <style>
+      body, html, ul, li {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+      }
+      li {
+        list-style: none;
+      }
+      a {
+        text-decoration: none;
+      }
+      .menu-aim {
+        width: 300px;
+      }
+      .menu-aim__item {
+        position: relative;
+        width: 300px;
+      }
+      .menu-aim__item a {
+        display: block;
+        color: blue;
+      }
+      .menu-aim__item a:hover,
+      .menu-aim__item--active .menu-aim__item-name {
+        color: white;
+        background: blue;
+      }
+      .menu-aim__item-submenu {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 300px;
+        width: 300px;
+      }
+      .menu-aim__item--active .menu-aim__item-submenu {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <ul class="menu-aim">
+      <li class="menu-aim__item">
+        <a class="menu-aim__item-name" href="#">foo</a>
+        <ul class="menu-aim__item-submenu">
+          <li><a href="#">qux</a></li>
+          <li><a href="#">quux</a></li>
+          <li><a href="#">quuux</a></li>
+          <li><a href="#">quuuux</a></li>
+          <li><a href="#">quuuuux</a></li>
+          <li><a href="#">quuuuuux</a></li>
+          <li><a href="#">quuuuuuux</a></li>
+        </ul>
+      </li>
+      <li class="menu-aim__item">
+        <a class="menu-aim__item-name" href="#">bar</a>
+        <ul class="menu-aim__item-submenu">
+          <li><a href="#">baz</a></li>
+          <li><a href="#">qux</a></li>
+        </ul>
+      </li>
+    </ul>
+    <script src="/lib/index.js"></script>
+    <script>
+      window.menuAim(document.querySelector('.menu-aim'), {
+        submenuDirection: 'right',
+        menuItemSelector: '.menu-aim__item',
+        activeMenuItemClassName: 'menu-aim__item--active'
+      });
+    </script>
+  </body>
+</html>
