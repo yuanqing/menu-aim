@@ -18,6 +18,7 @@
 
   const defaultOptions = {
     menuItemSelector: '.menu-aim__item',
+    isDelayingClassName: 'menu-aim--is-delaying',
     activeMenuItemClassName: 'menu-aim__item--active',
     delay: 200,
     submenuDirection: 'right',
@@ -108,7 +109,8 @@
       }
     }
 
-    // Set `activeMenuItem` to the given menu `row`, and activate it immediately.
+    // Set `activeMenuItem` to the given `menuItem`, and activate
+    // it immediately.
     function activateMenuItem(menuItem) {
       if (menuItem === activeMenuItem) {
         // Exit if the `menuItem` we want to activate is already
@@ -135,60 +137,57 @@
       }, options.delay);
     }
 
-    // Returns `true` if the `activeMenuItem` should be set to a new row, else
-    // returns `false`.
+    // Returns `true` if the `activeMenuItem` should be set to a new menu
+    // item, else returns `false`.
     function shouldChangeActiveMenuItem() {
 
-      // If there isn't an `activeMenuItem`, activate the new row immediately.
-      if (!activeMenuItem) {
+      if (
+
+        // If there isn't an `activeMenuItem`, activate the new menu item
+        // immediately.
+        !activeMenuItem ||
+
+        // If `currentCoordinates` or `previousCoordinates` are still their
+        // initial values, activate the new menu item immediately.
+        !currentCoordinates || !previousCoordinates ||
+
+        // If the mouse was previously outside the menu's bounds, activate the
+        // new menu item immediately.
+        previousCoordinates.x < topLeft.x ||
+        previousCoordinates.x > bottomRight.x ||
+        previousCoordinates.y < topLeft.y ||
+        previousCoordinates.y > bottomRight.y ||
+
+        // If the mouse hasn't moved since the last time we checked, activate the
+        // new menu item immediately.
+        (lastCheckedCoordinates &&
+         currentCoordinates.x === lastCheckedCoordinates.x &&
+         currentCoordinates.y === lastCheckedCoordinates.y) ||
+
+        // Our expectations for decreasing or increasing gradients depends on
+        // the direction that the submenu shows relative to the menu items. For
+        // example, if the submenu is on the right, expect the slope between
+        // the mouse coordinate and the upper right corner to decrease over
+        // time. If either of the below two conditions are true, the mouse was
+        // not moving towards the content of `activeMenuItem`, so we activate
+        // the new menu item immediately.
+        computeGradient(currentCoordinates,  decreasingCorner) >
+        computeGradient(previousCoordinates, decreasingCorner) ||
+        computeGradient(currentCoordinates,  increasingCorner) <
+        computeGradient(previousCoordinates, increasingCorner)
+
+      ) {
+        lastCheckedCoordinates = null;
+        element.classList.remove(options.isDelayingClassName);
         return true;
       }
 
-      // Activate the new menu item immediately if `currentCoordinates` or
-      // `previousCoordinates` are still their initial values.
-      if (!currentCoordinates || !previousCoordinates) {
-        return true;
-      }
-
-      // If the mouse was previously outside the menu's bounds, activate the
-      // new menu item immediately.
-      if (previousCoordinates.x < topLeft.x ||
-          previousCoordinates.x > bottomRight.x ||
-          previousCoordinates.y < topLeft.y ||
-          previousCoordinates.y > bottomRight.y) {
-        return true;
-      }
-
-      // If the mouse hasn't moved since the last time we checked, activate the
-      // new menu item immediately.
-      if (lastCheckedCoordinates &&
-          currentCoordinates.x === lastCheckedCoordinates.x &&
-          currentCoordinates.y === lastCheckedCoordinates.y) {
-        return true;
-      }
-
-      // Our expectations for decreasing or increasing gradients depends on
-      // the direction that the submenu shows relative to the menu items. For
-      // example, if the submenu is on the right, expect the slope between the
-      // mouse coordinate and the upper right corner to decrease over time.
-      const currentDecreasingGradient = computeGradient(currentCoordinates, decreasingCorner);
-      const currentIncreasingGradient = computeGradient(currentCoordinates, increasingCorner);
-      const previousDecreasingGradient = computeGradient(previousCoordinates, decreasingCorner);
-      const previousIncreasingGradient = computeGradient(previousCoordinates, increasingCorner);
-      if (currentDecreasingGradient < previousDecreasingGradient &&
-          currentIncreasingGradient > previousIncreasingGradient) {
-        // The mouse moved from `previousCoordinates` towards the content of
-        // the `activeMenuItem`, so we should wait before attempting to activate
-        // the new menu row again.
-        lastCheckedCoordinates = currentCoordinates;
-        return false;
-      }
-
-      // The mouse was not moving towards the content of `activeMenuItem`, so
-      // immediately activate the new menu row.
-      lastCheckedCoordinates = null;
-
-      return true;
+      // The mouse moved from `previousCoordinates` towards the content of
+      // the `activeMenuItem`, so we should wait before attempting to activate
+      // the new menu item again.
+      lastCheckedCoordinates = currentCoordinates;
+      element.classList.add(options.isDelayingClassName);
+      return false;
     }
 
     function onMouseLeave() {
@@ -202,14 +201,19 @@
     }
 
     function onMenuItemClick() {
-      // Immediately activate the row that was clicked.
+      // Immediately activate the menu item that was clicked.
       cancelPendingMenuItemActivations();
       activateMenuItem(this);
     }
 
     function onMenuItemMouseEnter() {
-      // Attempt to activate the row that the mouse is currently mousing over.
+      // Attempt to activate the menu item that the mouse is currently
+      // mousing over.
+      var isMouseEnter = activeMenuItem === null;
       possiblyActivateMenuItem(this);
+      if (isMouseEnter) {
+        options.mouseEnterCallback(activeMenuItem);
+      }
     }
 
     // Hook up the required event listeners.
