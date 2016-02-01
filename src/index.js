@@ -17,7 +17,6 @@
   function noop() {}
 
   const defaultOptions = {
-    activeMenuClassName: 'menu-aim--active',
     menuItemSelector: '.menu-aim__item',
     activeMenuItemClassName: 'menu-aim__item--active',
     delay: 200,
