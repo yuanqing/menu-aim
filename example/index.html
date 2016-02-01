@@ -33,11 +33,10 @@
         color: white;
         background: blue;
       }
-      .menu-aim--is-delaying .menu-aim__item-name:hover {
+      .menu-aim--delaying .menu-aim__item-name:hover {
         color: blue;
         background: none;
       }
-
       .menu-aim__item-submenu {
         display: none;
         position: absolute;
@@ -77,6 +76,7 @@
       window.menuAim(document.querySelector('.menu-aim'), {
         submenuDirection: 'right',
         menuItemSelector: '.menu-aim__item',
+        delayingClassName: 'menu-aim--delaying',
         activeMenuItemClassName: 'menu-aim__item--active'
       });
     </script>

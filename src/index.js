@@ -18,7 +18,7 @@
 
   const defaultOptions = {
     menuItemSelector: '.menu-aim__item',
-    isDelayingClassName: 'menu-aim--is-delaying',
+    delayingClassName: 'menu-aim--delaying',
     activeMenuItemClassName: 'menu-aim__item--active',
     delay: 200,
     submenuDirection: 'right',
@@ -178,7 +178,7 @@
 
       ) {
         lastCheckedCoordinates = null;
-        element.classList.remove(options.isDelayingClassName);
+        element.classList.remove(options.delayingClassName);
         return true;
       }
 
@@ -186,7 +186,7 @@
       // the `activeMenuItem`, so we should wait before attempting to activate
       // the new menu item again.
       lastCheckedCoordinates = currentCoordinates;
-      element.classList.add(options.isDelayingClassName);
+      element.classList.add(options.delayingClassName);
       return false;
     }
 
