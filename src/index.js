@@ -16,19 +16,73 @@
 
   function noop() {}
 
-  function menuAim(element, options) {
+  const defaultOptions = {
+    activeMenuClassName: 'menu-aim--active',
+    menuItemSelector: '.menu-aim__item',
+    activeMenuItemClassName: 'menu-aim__item--active',
+    delay: 200,
+    submenuDirection: 'right',
+    activateCallback: noop,
+    deactivateCallback: noop,
+    mouseEnterCallback: noop,
+    mouseLeaveCallback: noop
+  };
 
-    const rowSelector = options.rowSelector || '.menu-aim-item';
-    const delay = options.delay || 250;
-    const submenuDirection = options.submenuDirection || 'right';
-    const activateCallback = options.activateCallback || noop;
-    const deactivateCallback = options.deactivateCallback || noop;
+  function menuAim(element, options = {}) {
 
-    let activeRow = null;
+    options = Object.assign({}, defaultOptions, options);
+
+    let activeMenuItem = null;
     let timeoutId = null;
+
     let previousCoordinates = null;
     let currentCoordinates = null;
     let lastCheckedCoordinates = null;
+
+    // Compute the pixel coordinates of the four corners of the block taken up
+    // by all the items that match the `menuItemSelector`.
+    const offset = computeElementOffset(element);
+    const topLeft = {
+      x: offset.left,
+      y: offset.top - 100
+    };
+    const topRight = {
+      x: offset.left + element.offsetWidth,
+      y: topLeft.y
+    };
+    const bottomLeft = {
+      x: offset.left,
+      y: offset.top + element.offsetHeight + 100
+    };
+    const bottomRight = {
+      x: offset.left + element.offsetWidth,
+      y: bottomLeft.y
+    };
+
+    // Our expectations for decreasing or increasing gradients depends on
+    // the direction that the submenu shows relative to the menu items. For
+    // example, if the submenu is on the right, expect the slope between the
+    // mouse coordinate and the upper right corner to decrease over time.
+    let decreasingCorner;
+    let increasingCorner;
+    switch (options.submenuDirection) {
+      case 'top':
+        decreasingCorner = topLeft;
+        increasingCorner = topRight;
+        break;
+      case 'bottom':
+        decreasingCorner = bottomRight;
+        increasingCorner = bottomLeft;
+        break;
+      case 'left':
+        decreasingCorner = bottomLeft;
+        increasingCorner = topLeft;
+        break;
+      default:
+        decreasingCorner = topRight;
+        increasingCorner = bottomRight;
+        break;
+    }
 
     // Record the last 2 mouse coordinates.
     function saveMouseCoordinates(event) {
@@ -39,77 +93,66 @@
       };
     }
 
-    // Cancel pending menu row activations.
-    function cancelPendingRowActivations() {
+    // Cancel pending menu item activations.
+    function cancelPendingMenuItemActivations() {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
     }
 
-    // Set `activeRow` to the given menu `row`, and activate it immediately.
-    function activateRow(row) {
-      if (row === activeRow) {
-        // Exit if the menu `row` we want to activate is already
-        // the `activeRow`.
+    function deactivateActiveMenuItem() {
+      if (activeMenuItem) {
+        // If there is an `activeMenuItem`, deactivate it.
+        activeMenuItem.classList.remove(options.activeMenuItemClassName);
+        options.deactivateCallback(activeMenuItem);
+        activeMenuItem = null;
+      }
+    }
+
+    // Set `activeMenuItem` to the given menu `row`, and activate it immediately.
+    function activateMenuItem(menuItem) {
+      if (menuItem === activeMenuItem) {
+        // Exit if the `menuItem` we want to activate is already
+        // the `activeMenuItem`.
         return;
       }
-      if (activeRow) {
-        // If there is an `activeRow`, deactivate it.
-        deactivateCallback(activeRow);
-      }
-      // Activate the given menu `row`.
-      activateCallback(row);
-      activeRow = row;
+      deactivateActiveMenuItem();
+      // Activate the given `menuItem`.
+      menuItem.classList.add(options.activeMenuItemClassName);
+      options.activateCallback(menuItem);
+      activeMenuItem = menuItem;
     }
 
-    // Check if we should activate the given menu `row`. If we find that the
-    // mouse is moving towards the content of `activeRow`, attempt to activate
-    // the row again after a `delay`.
-    function possiblyActivateRow(row) {
-      cancelPendingRowActivations();
-      if (shouldChangeActiveRow()) {
-        return activateRow(row);
+    // Check if we should activate the given `menuItem`. If we find that the
+    // mouse is moving towards the submenu of the `activeMenuItem`, attempt to
+    // activate the `menuItem` again after a short `delay`.
+    function possiblyActivateMenuItem(menuItem) {
+      cancelPendingMenuItemActivations();
+      if (shouldChangeActiveMenuItem()) {
+        return activateMenuItem(menuItem);
       }
       timeoutId = setTimeout(() => {
-        possiblyActivateRow(row);
-      }, delay);
+        possiblyActivateMenuItem(menuItem);
+      }, options.delay);
     }
 
-    // Returns `true` if the `activeRow` should be set to a new row, else
+    // Returns `true` if the `activeMenuItem` should be set to a new row, else
     // returns `false`.
-    function shouldChangeActiveRow() {
+    function shouldChangeActiveMenuItem() {
 
-      // If there isn't an `activeRow`, activate the new row immediately.
-      if (!activeRow) {
+      // If there isn't an `activeMenuItem`, activate the new row immediately.
+      if (!activeMenuItem) {
         return true;
       }
 
-      const offset = computeElementOffset(element);
-      const topLeft = {
-        x: offset.left,
-        y: offset.top
-      };
-      const topRight = {
-        x: offset.left + element.offsetWidth,
-        y: topLeft.y
-      };
-      const bottomLeft = {
-        x: offset.left,
-        y: offset.top + element.offsetHeight
-      };
-      const bottomRight = {
-        x: offset.left + element.offsetWidth,
-        y: bottomLeft.y
-      };
-
-      // Activate the new row immediately if `currentCoordinates` or
+      // Activate the new menu item immediately if `currentCoordinates` or
       // `previousCoordinates` are still their initial values.
       if (!currentCoordinates || !previousCoordinates) {
         return true;
       }
 
       // If the mouse was previously outside the menu's bounds, activate the
-      // new row immediately.
+      // new menu item immediately.
       if (previousCoordinates.x < topLeft.x ||
           previousCoordinates.x > bottomRight.x ||
           previousCoordinates.y < topLeft.y ||
@@ -117,8 +160,8 @@
         return true;
       }
 
-      // If the mouse hasn't move since the last time we checked, activate the
-      // new row immediately.
+      // If the mouse hasn't moved since the last time we checked, activate the
+      // new menu item immediately.
       if (lastCheckedCoordinates &&
           currentCoordinates.x === lastCheckedCoordinates.x &&
           currentCoordinates.y === lastCheckedCoordinates.y) {
@@ -126,68 +169,67 @@
       }
 
       // Our expectations for decreasing or increasing gradients depends on
-      // the direction that the submenu shows relative to the menu rows. For
+      // the direction that the submenu shows relative to the menu items. For
       // example, if the submenu is on the right, expect the slope between the
       // mouse coordinate and the upper right corner to decrease over time.
-      let decreasingCorner = topRight;
-      let increasingCorner = bottomRight;
-      if (submenuDirection === 'left') {
-        decreasingCorner = bottomLeft;
-        increasingCorner = topLeft;
-      } else if (submenuDirection === 'below') {
-        decreasingCorner = bottomRight;
-        increasingCorner = bottomLeft;
-      } else if (submenuDirection === 'above') {
-        decreasingCorner = topLeft;
-        increasingCorner = topRight;
-      }
-      const currentDecreasingSlope = computeGradient(currentCoordinates, decreasingCorner);
-      const currentIncreasingSlope = computeGradient(currentCoordinates, increasingCorner);
-      const previousDecreasingSlope = computeGradient(previousCoordinates, decreasingCorner);
-      const previousIncreasingSlope = computeGradient(previousCoordinates, increasingCorner);
-      if (currentDecreasingSlope < previousDecreasingSlope &&
-          currentIncreasingSlope > previousIncreasingSlope) {
+      const currentDecreasingGradient = computeGradient(currentCoordinates, decreasingCorner);
+      const currentIncreasingGradient = computeGradient(currentCoordinates, increasingCorner);
+      const previousDecreasingGradient = computeGradient(previousCoordinates, decreasingCorner);
+      const previousIncreasingGradient = computeGradient(previousCoordinates, increasingCorner);
+      if (currentDecreasingGradient < previousDecreasingGradient &&
+          currentIncreasingGradient > previousIncreasingGradient) {
         // The mouse moved from `previousCoordinates` towards the content of
-        // the `activeRow`, so we should wait before attempting to activate
+        // the `activeMenuItem`, so we should wait before attempting to activate
         // the new menu row again.
         lastCheckedCoordinates = currentCoordinates;
         return false;
       }
 
-      // The mouse was not moving towards the content of `activeRow`, so
+      // The mouse was not moving towards the content of `activeMenuItem`, so
       // immediately activate the new menu row.
       lastCheckedCoordinates = null;
+
       return true;
     }
 
-    function onRowClick() {
-      // Immediately activate the row that was clicked.
-      cancelPendingRowActivations();
-      activateRow(this);
+    function onMouseLeave() {
+      // Attempt to deactivate the `activeMenuItem` if we have left the menu
+      // `element` entirely.
+      if (shouldChangeActiveMenuItem()) {
+        cancelPendingMenuItemActivations();
+        options.mouseLeaveCallback(activeMenuItem);
+        deactivateActiveMenuItem();
+      }
     }
 
-    function onRowMouseEnter() {
+    function onMenuItemClick() {
+      // Immediately activate the row that was clicked.
+      cancelPendingMenuItemActivations();
+      activateMenuItem(this);
+    }
+
+    function onMenuItemMouseEnter() {
       // Attempt to activate the row that the mouse is currently mousing over.
-      possiblyActivateRow(this);
+      possiblyActivateMenuItem(this);
     }
 
     // Hook up the required event listeners.
-    const rows = [].slice.call(element.querySelectorAll(rowSelector));
-    rows.forEach(row => {
-      row.addEventListener('click', onRowClick);
-      row.addEventListener('mouseenter', onRowMouseEnter);
+    const menuItems = [].slice.call(element.querySelectorAll(options.menuItemSelector));
+    menuItems.forEach((menuItem) => {
+      menuItem.addEventListener('click', onMenuItemClick);
+      menuItem.addEventListener('mouseenter', onMenuItemMouseEnter);
     });
     document.addEventListener('mousemove', saveMouseCoordinates);
-    element.addEventListener('mouseleave', cancelPendingRowActivations);
+    element.addEventListener('mouseleave', onMouseLeave);
 
     // Return a function for unhooking all event listeners.
     return function() {
-      rows.forEach(row => {
-        row.removeEventListener('click', onRowClick);
-        row.removeEventListener('mouseenter', onRowMouseEnter);
+      menuItems.forEach((menuItem) => {
+        menuItem.removeEventListener('click', onMenuItemClick);
+        menuItem.removeEventListener('mouseenter', onMenuItemMouseEnter);
       });
       document.removeEventListener('mousemove', saveMouseCoordinates);
-      element.removeEventListener('mouseleave', cancelPendingRowActivations);
+      element.removeEventListener('mouseleave', onMouseLeave);
     };
 
   }
