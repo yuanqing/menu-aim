@@ -16,21 +16,27 @@
 
   function noop() {}
 
-  const defaultOptions = {
-    menuItemSelector: '.menu-aim__item',
-    delayingClassName: 'menu-aim--delaying',
-    activeMenuItemClassName: 'menu-aim__item--active',
-    delay: 200,
-    submenuDirection: 'right',
-    activateCallback: noop,
-    deactivateCallback: noop,
-    mouseEnterCallback: noop,
-    mouseLeaveCallback: noop
-  };
+  function manipulateClass(classListMethod) {
+    return (element, classNames) => {
+      classNames.forEach((className) => {
+        element.classList[classListMethod](className);
+      });
+    }
+  }
+  const addClasses = manipulateClass('add');
+  const removeClasses = manipulateClass('remove');
 
-  function menuAim(element, options = {}) {
+  function menuAim(menuElement, options) {
 
-    options = Object.assign({}, defaultOptions, options);
+    const contentDirection = options.contentDirection || 'right'
+    const delay = options.delay || 200;
+    const menuItemSelector = options.menuItemSelector || '.menu-aim__item';
+    const menuItemActiveClassName = [].concat(options.menuItemActiveClassName || 'menu-aim__item--active');
+    const delayingClassName = [].concat(options.delayingClassName || 'menu-aim--delaying');
+    const activateCallback = options.activateCallback || noop;
+    const deactivateCallback = options.deactivateCallback || noop;
+    const mouseEnterCallback = options.mouseEnterCallback || noop;
+    const mouseLeaveCallback = options.mouseLeaveCallback || noop;
 
     let activeMenuItem = null;
     let timeoutId = null;
@@ -41,31 +47,31 @@
 
     // Compute the pixel coordinates of the four corners of the block taken up
     // by all the items that match the `menuItemSelector`.
-    const offset = computeElementOffset(element);
+    const offset = computeElementOffset(menuElement);
     const topLeft = {
       x: offset.left,
       y: offset.top - 100
     };
     const topRight = {
-      x: offset.left + element.offsetWidth,
+      x: offset.left + menuElement.offsetWidth,
       y: topLeft.y
     };
     const bottomLeft = {
       x: offset.left,
-      y: offset.top + element.offsetHeight + 100
+      y: offset.top + menuElement.offsetHeight + 100
     };
     const bottomRight = {
-      x: offset.left + element.offsetWidth,
+      x: offset.left + menuElement.offsetWidth,
       y: bottomLeft.y
     };
 
     // Our expectations for decreasing or increasing gradients depends on
-    // the direction that the submenu shows relative to the menu items. For
-    // example, if the submenu is on the right, expect the slope between the
-    // mouse coordinate and the upper right corner to decrease over time.
+    // the direction that the menu content shows relative to the menu items.
+    // For example, if the content is on the right, expect the slope between
+    // the mouse coordinate and the upper right corner to decrease over time.
     let decreasingCorner;
     let increasingCorner;
-    switch (options.submenuDirection) {
+    switch (contentDirection) {
       case 'top':
         decreasingCorner = topLeft;
         increasingCorner = topRight;
@@ -103,8 +109,8 @@
     function deactivateActiveMenuItem() {
       if (activeMenuItem) {
         // If there is an `activeMenuItem`, deactivate it.
-        activeMenuItem.classList.remove(options.activeMenuItemClassName);
-        options.deactivateCallback(activeMenuItem);
+        removeClasses(activeMenuItem, menuItemActiveClassName);
+        deactivateCallback(activeMenuItem);
         activeMenuItem = null;
       }
     }
@@ -119,22 +125,9 @@
       }
       deactivateActiveMenuItem();
       // Activate the given `menuItem`.
-      menuItem.classList.add(options.activeMenuItemClassName);
-      options.activateCallback(menuItem);
+      addClasses(menuItem, menuItemActiveClassName);
+      activateCallback(menuItem);
       activeMenuItem = menuItem;
-    }
-
-    // Check if we should activate the given `menuItem`. If we find that the
-    // mouse is moving towards the submenu of the `activeMenuItem`, attempt to
-    // activate the `menuItem` again after a short `delay`.
-    function possiblyActivateMenuItem(menuItem) {
-      cancelPendingMenuItemActivations();
-      if (shouldChangeActiveMenuItem()) {
-        return activateMenuItem(menuItem);
-      }
-      timeoutId = setTimeout(() => {
-        possiblyActivateMenuItem(menuItem);
-      }, options.delay);
     }
 
     // Returns `true` if the `activeMenuItem` should be set to a new menu
@@ -165,20 +158,20 @@
          currentCoordinates.y === lastCheckedCoordinates.y) ||
 
         // Our expectations for decreasing or increasing gradients depends on
-        // the direction that the submenu shows relative to the menu items. For
-        // example, if the submenu is on the right, expect the slope between
+        // the direction that the content shows relative to the menu items. For
+        // example, if the content is on the right, expect the slope between
         // the mouse coordinate and the upper right corner to decrease over
         // time. If either of the below two conditions are true, the mouse was
         // not moving towards the content of `activeMenuItem`, so we activate
         // the new menu item immediately.
-        computeGradient(currentCoordinates,  decreasingCorner) >
+        computeGradient(currentCoordinates, decreasingCorner) >
         computeGradient(previousCoordinates, decreasingCorner) ||
-        computeGradient(currentCoordinates,  increasingCorner) <
+        computeGradient(currentCoordinates, increasingCorner) <
         computeGradient(previousCoordinates, increasingCorner)
 
       ) {
         lastCheckedCoordinates = null;
-        element.classList.remove(options.delayingClassName);
+        removeClasses(menuElement, delayingClassName);
         return true;
       }
 
@@ -186,16 +179,29 @@
       // the `activeMenuItem`, so we should wait before attempting to activate
       // the new menu item again.
       lastCheckedCoordinates = currentCoordinates;
-      element.classList.add(options.delayingClassName);
+      addClasses(menuElement, delayingClassName);
       return false;
+    }
+
+    // Check if we should activate the given `menuItem`. If we find that the
+    // mouse is moving towards the content of the `activeMenuItem`, attempt to
+    // activate the `menuItem` again after a short `delay`.
+    function possiblyActivateMenuItem(menuItem) {
+      cancelPendingMenuItemActivations();
+      if (shouldChangeActiveMenuItem()) {
+        return activateMenuItem(menuItem);
+      }
+      timeoutId = setTimeout(() => {
+        possiblyActivateMenuItem(menuItem);
+      }, delay);
     }
 
     function onMouseLeave() {
       // Attempt to deactivate the `activeMenuItem` if we have left the menu
-      // `element` entirely.
+      // `menuElement` entirely.
       if (shouldChangeActiveMenuItem()) {
         cancelPendingMenuItemActivations();
-        options.mouseLeaveCallback(activeMenuItem);
+        mouseLeaveCallback(activeMenuItem);
         deactivateActiveMenuItem();
       }
     }
@@ -209,30 +215,44 @@
     function onMenuItemMouseEnter() {
       // Attempt to activate the menu item that the mouse is currently
       // mousing over.
-      var isMouseEnter = activeMenuItem === null;
+      const isMouseEnter = activeMenuItem === null;
       possiblyActivateMenuItem(this);
       if (isMouseEnter) {
-        options.mouseEnterCallback(activeMenuItem);
+        mouseEnterCallback(activeMenuItem);
       }
     }
 
-    // Hook up the required event listeners.
-    const menuItems = [].slice.call(element.querySelectorAll(options.menuItemSelector));
+    function deactivateIfClickedOutsideMenu(event) {
+      let targetElement = event.target;
+      while (targetElement && targetElement !== menuElement) {
+        targetElement = targetElement.parentNode;
+      }
+      if (!targetElement) {
+        deactivateActiveMenuItem();
+      }
+    }
+
+    // Bind the required event listeners.
+    const menuItems = [].slice.call(menuElement.querySelectorAll(menuItemSelector));
     menuItems.forEach((menuItem) => {
       menuItem.addEventListener('click', onMenuItemClick);
       menuItem.addEventListener('mouseenter', onMenuItemMouseEnter);
     });
-    document.addEventListener('mousemove', saveMouseCoordinates);
-    element.addEventListener('mouseleave', onMouseLeave);
+    window.addEventListener('mousemove', saveMouseCoordinates);
+    window.addEventListener('scroll', deactivateActiveMenuItem);
+    window.addEventListener('click', deactivateIfClickedOutsideMenu);
+    menuElement.addEventListener('mouseleave', onMouseLeave);
 
-    // Return a function for unhooking all event listeners.
-    return function() {
+    // Return a function for unbinding all event listeners.
+    return () => {
       menuItems.forEach((menuItem) => {
         menuItem.removeEventListener('click', onMenuItemClick);
         menuItem.removeEventListener('mouseenter', onMenuItemMouseEnter);
       });
-      document.removeEventListener('mousemove', saveMouseCoordinates);
-      element.removeEventListener('mouseleave', onMouseLeave);
+      window.removeEventListener('mousemove', saveMouseCoordinates);
+      window.removeEventListener('scroll', deactivateActiveMenuItem);
+      window.removeEventListener('click', deactivateIfClickedOutsideMenu);
+      menuElement.removeEventListener('mouseleave', onMouseLeave);
     };
 
   }
