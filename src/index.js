@@ -21,14 +21,14 @@
       classNames.forEach((className) => {
         element.classList[classListMethod](className);
       });
-    }
+    };
   }
   const addClasses = manipulateClass('add');
   const removeClasses = manipulateClass('remove');
 
   function menuAim(menuElement, options) {
 
-    const contentDirection = options.contentDirection || 'right'
+    const contentDirection = options.contentDirection || 'right';
     const delay = options.delay || 200;
     const menuItemSelector = options.menuItemSelector || '.menu-aim__item';
     const menuItemActiveClassName = [].concat(options.menuItemActiveClassName || 'menu-aim__item--active');
@@ -50,7 +50,7 @@
     const offset = computeElementOffset(menuElement);
     const topLeft = {
       x: offset.left,
-      y: offset.top - 100
+      y: offset.top
     };
     const topRight = {
       x: offset.left + menuElement.offsetWidth,
@@ -58,7 +58,7 @@
     };
     const bottomLeft = {
       x: offset.left,
-      y: offset.top + menuElement.offsetHeight + 100
+      y: offset.top + menuElement.offsetHeight
     };
     const bottomRight = {
       x: offset.left + menuElement.offsetWidth,
