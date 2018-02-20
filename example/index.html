@@ -71,14 +71,16 @@
         </ul>
       </li>
     </ul>
-    <script src="/lib/index.js"></script>
+    <script src="/bundle.js"></script>
     <script>
-      window.menuAim(document.querySelector('.menu-aim'), {
+      const element = document.querySelector('.menu-aim')
+      const options = {
         contentDirection: 'right',
         menuItemSelector: '.menu-aim__item',
         menuItemActiveClassName: 'menu-aim__item--active',
         delayingClassName: 'menu-aim--delaying'
-      });
+      }
+      menuAim(element, options)
     </script>
   </body>
 </html>
