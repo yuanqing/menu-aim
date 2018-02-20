@@ -39,12 +39,12 @@ module.exports = function menuAim (menuElement, options) {
   var mouseEnterCallback = options.mouseEnterCallback || noop
   var mouseLeaveCallback = options.mouseLeaveCallback || noop
 
-  let activeMenuItem = null
-  let timeoutId = null
+  var activeMenuItem = null
+  var timeoutId = null
 
-  let previousCoordinates = null
-  let currentCoordinates = null
-  let lastCheckedCoordinates = null
+  var previousCoordinates = null
+  var currentCoordinates = null
+  var lastCheckedCoordinates = null
 
   // Compute the pixel coordinates of the four corners of the block taken up
   // by all the items that match the `menuItemSelector`.
@@ -70,8 +70,8 @@ module.exports = function menuAim (menuElement, options) {
   // the direction that the menu content shows relative to the menu items.
   // For example, if the content is on the right, expect the slope between
   // the mouse coordinate and the upper right corner to decrease over time.
-  let decreasingCorner
-  let increasingCorner
+  var decreasingCorner
+  var increasingCorner
   switch (contentDirection) {
     case 'top':
       decreasingCorner = topLeft
@@ -218,7 +218,7 @@ module.exports = function menuAim (menuElement, options) {
   }
 
   function deactivateIfClickedOutsideMenu (event) {
-    let targetElement = event.target
+    var targetElement = event.target
     while (targetElement && targetElement !== menuElement) {
       targetElement = targetElement.parentNode
     }
