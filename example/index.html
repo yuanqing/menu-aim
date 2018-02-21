@@ -18,11 +18,11 @@
         text-decoration: none;
       }
       .menu-aim {
-        width: 300px;
+        width: 100px;
       }
       .menu-aim__item {
         position: relative;
-        width: 300px;
+        width: 100px;
       }
       .menu-aim a {
         display: block;
@@ -41,8 +41,8 @@
         display: none;
         position: absolute;
         top: 0;
-        left: 300px;
-        width: 300px;
+        left: 100px;
+        width: 100px;
       }
       .menu-aim__item--active .menu-aim__item-submenu {
         display: block;
@@ -54,20 +54,38 @@
       <li class="menu-aim__item">
         <a class="menu-aim__item-name" href="#">foo</a>
         <ul class="menu-aim__item-submenu">
-          <li><a href="#">qux</a></li>
-          <li><a href="#">quux</a></li>
-          <li><a href="#">quuux</a></li>
-          <li><a href="#">quuuux</a></li>
-          <li><a href="#">quuuuux</a></li>
-          <li><a href="#">quuuuuux</a></li>
-          <li><a href="#">quuuuuuux</a></li>
+          <li><a href="#">foo</a></li>
+          <li><a href="#">fooo</a></li>
+          <li><a href="#">foooo</a></li>
+          <li><a href="#">fooooo</a></li>
+          <li><a href="#">foooooo</a></li>
+          <li><a href="#">fooooooo</a></li>
+          <li><a href="#">foooooooo</a></li>
         </ul>
       </li>
       <li class="menu-aim__item">
         <a class="menu-aim__item-name" href="#">bar</a>
         <ul class="menu-aim__item-submenu">
+          <li><a href="#">bar</a></li>
+          <li><a href="#">baar</a></li>
+          <li><a href="#">baaar</a></li>
+          <li><a href="#">baaaar</a></li>
+          <li><a href="#">baaaaar</a></li>
+          <li><a href="#">baaaaaar</a></li>
+          <li><a href="#">baaaaaaar</a></li>
+        </ul>
+      </li>
+      <li class="menu-aim__item">
+        <a class="menu-aim__item-name" href="#">baz</a>
+        <ul class="menu-aim__item-submenu">
           <li><a href="#">baz</a></li>
-          <li><a href="#">qux</a></li>
+          <li><a href="#">baaz</a></li>
+          <li><a href="#">baaaz</a></li>
+          <li><a href="#">baaaaz</a></li>
+          <li><a href="#">baaaaaz</a></li>
+          <li><a href="#">baaaaaaz</a></li>
+          <li><a href="#">baaaaaaaz</a></li>
+          <li><a href="#">baaaaaaaaz</a></li>
         </ul>
       </li>
     </ul>
@@ -75,7 +93,6 @@
     <script>
       const element = document.querySelector('.menu-aim')
       const options = {
-        contentDirection: 'right',
         menuItemSelector: '.menu-aim__item',
         menuItemActiveClassName: 'menu-aim__item--active',
         delayingClassName: 'menu-aim--delaying'
