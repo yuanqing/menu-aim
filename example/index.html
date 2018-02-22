@@ -9,7 +9,7 @@
         padding: 0;
       }
       body {
-        font-family: 'Helvetica', 'Arial', sans-serif;
+        font-family: sans-serif;
       }
       li {
         list-style: none;
@@ -19,9 +19,6 @@
       }
       .menu-aim {
         width: 100px;
-      }
-      .menu-aim--delaying {
-        background: gray;
       }
       .menu-aim__item {
         position: relative;
@@ -34,11 +31,11 @@
       .menu-aim a:hover,
       .menu-aim__item--active .menu-aim__item-name {
         color: white;
-        background: blue;
+        background-color: blue;
       }
       .menu-aim--delaying .menu-aim__item-name:hover {
-        color: blue;
-        background: none;
+        color: white;
+        background-color: magenta;
       }
       .menu-aim__item-submenu {
         display: none;
@@ -57,7 +54,6 @@
       <li class="menu-aim__item">
         <a class="menu-aim__item-name" href="#">foo</a>
         <ul class="menu-aim__item-submenu">
-          <li><a href="#">foo</a></li>
           <li><a href="#">fooo</a></li>
           <li><a href="#">foooo</a></li>
           <li><a href="#">fooooo</a></li>
@@ -69,7 +65,6 @@
       <li class="menu-aim__item">
         <a class="menu-aim__item-name" href="#">bar</a>
         <ul class="menu-aim__item-submenu">
-          <li><a href="#">bar</a></li>
           <li><a href="#">baar</a></li>
           <li><a href="#">baaar</a></li>
           <li><a href="#">baaaar</a></li>
@@ -81,7 +76,6 @@
       <li class="menu-aim__item">
         <a class="menu-aim__item-name" href="#">baz</a>
         <ul class="menu-aim__item-submenu">
-          <li><a href="#">baz</a></li>
           <li><a href="#">baaz</a></li>
           <li><a href="#">baaaz</a></li>
           <li><a href="#">baaaaz</a></li>
