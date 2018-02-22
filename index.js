@@ -15,15 +15,15 @@ function computeGradient (pointA, pointB) {
   return (pointB.y - pointA.y) / (pointB.x - pointA.x)
 }
 
-function manipulateClass (classListMethod) {
+function createClassManipulationFunction (classListMethod) {
   return function (element, classNames) {
     classNames.forEach(function (className) {
       element.classList[classListMethod](className)
     })
   }
 }
-var addClasses = manipulateClass('add')
-var removeClasses = manipulateClass('remove')
+var addClasses = createClassManipulationFunction('add')
+var removeClasses = createClassManipulationFunction('remove')
 
 module.exports = function (menuElement, options) {
   var menuDirection = options.menuDirection || 'right'
@@ -68,24 +68,25 @@ module.exports = function (menuElement, options) {
 
   function calculateMenuElementExtremeCoordinates () {
     var menuElementCoordinates = calculateExtremeCoordinates(menuElement)
-    return activeMenuItem
-      ? {
-        x: [
-          menuElementCoordinates.x[0],
-          activeSubMenuOffset.x + activeSubMenu.offsetWidth
-        ],
-        y: [
-          menuElementCoordinates.y[0],
-          activeSubMenuOffset.y + activeSubMenu.offsetHeight
-        ]
-      }
-      : menuElementCoordinates
+    if (!activeMenuItem) {
+      return menuElementCoordinates
+    }
+    return {
+      x: [
+        menuElementCoordinates.x[0],
+        activeSubMenuOffset.x[0] + activeSubMenu.offsetWidth
+      ],
+      y: [
+        menuElementCoordinates.y[0],
+        activeSubMenuOffset.y[0] + activeSubMenu.offsetHeight
+      ]
+    }
   }
 
   function possiblyDeactivateActiveMenuItem () {
-    var coordinates = calculateMenuElementExtremeCoordinates()
     var x = currentCoordinates.x
     var y = currentCoordinates.y
+    var coordinates = calculateMenuElementExtremeCoordinates()
     if (
       x < coordinates.x[0] ||
       x > coordinates.x[1] ||
@@ -147,7 +148,7 @@ module.exports = function (menuElement, options) {
     currentCoordinates.x = x
     currentCoordinates.y = y
     if (activeMenuItem) {
-      possiblyDeactivateActiveMenuItem(x, y)
+      possiblyDeactivateActiveMenuItem()
     }
   }
 
