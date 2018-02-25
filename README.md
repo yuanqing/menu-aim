@@ -36,12 +36,12 @@ const menuAim = require('menu-aim')
 
 - Keys on `options`:
 
-Key | Description | Default
-:--|:--|:--
-`menuItemSelector` | Selector for each menu item. | `.menu-aim__item`
-`menuItemActiveClassName` | Class name assigned to a menu item when it is active. | `menu-aim__item--active`
-`menuItemSubMenuSelector` | Selector for the sub-menu element nested within each menu item. | `.menu-aim__item-submenu`
-`delayingClassName` | Class name applied to `element` when some menu item is active and the mouse is determined to be enroute to the active submenu. | `menu-aim--delaying`
+  Key | Description | Default
+  :--|:--|:--
+  `menuItemSelector` | Selector for each menu item. | `.menu-aim__item`
+  `menuItemActiveClassName` | Class name assigned to a menu item when it is active. | `menu-aim__item--active`
+  `menuItemSubMenuSelector` | Selector for the sub-menu element nested within each menu item. | `.menu-aim__item-submenu`
+  `delayingClassName` | Class name applied to `element` when some menu item is active and the mouse is determined to be enroute to the active submenu. | `menu-aim--delaying`
 
 ## Installation
 
