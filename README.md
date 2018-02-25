@@ -2,7 +2,7 @@
 
 > [Instant mega menus](http://bjk5.com/post/44698559168/breaking-down-amazons-mega-dropdown) in vanilla JavaScript.
 
-- Keeps a sub-menu open when the mouse is determined to be enroute to the active submenu
+- Keeps a sub-menu open when the mouse is determined to be enroute to it
 - Otherwise, instantly switches to another item in the menu list
 - 670 bytes gzipped
 
