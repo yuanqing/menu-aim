@@ -1,6 +1,4 @@
-// Returns the top-left (Ax, Ay) and bottom-right (Bx, By) coordinates of
-// `element`. Returns an object in the form `{ x: [Ax, Bx], y: [Ay, By] }`.
-function calculateExtremeCoordinates (element) {
+function calculateTopLeftAndBottomRightCoordinates (element) {
   var rect = element.getBoundingClientRect()
   var topX =
     rect.left + (window.pageYOffset || document.documentElement.scrollTop)
@@ -12,7 +10,6 @@ function calculateExtremeCoordinates (element) {
   }
 }
 
-// Returns the gradient of a line drawn between point `A` and point `B`.
 function calculateGradient (A, B) {
   return (B.y - A.y) / (B.x - A.x)
 }
@@ -20,10 +17,10 @@ function calculateGradient (A, B) {
 module.exports = function (menuElement, options) {
   var delay = options.delay || 200
   var menuItemSelector = options.menuItemSelector || '.menu-aim__item'
-  var menuItemSubMenuSelector =
-    options.menuItemSubMenuSelector || '.menu-aim__item-submenu'
   var menuItemActiveClassName =
     options.menuItemActiveClassName || 'menu-aim__item--active'
+  var menuItemSubMenuSelector =
+    options.menuItemSubMenuSelector || '.menu-aim__item-submenu'
   var delayingClassName = options.delayingClassName || 'menu-aim--delaying'
 
   var previousMouseCoordinates = {}
@@ -32,30 +29,37 @@ module.exports = function (menuElement, options) {
   var activeMenuItem
   var activeSubMenuTopLeftCoordinates
   var activeSubMenuBottomLeftCoordinates
-  var menuElementCoordinates = calculateExtremeCoordinates(menuElement)
+  var topLeftCoordinates
+  var bottomLeftCoordinates
+
+  var menuElementCoordinates = calculateTopLeftAndBottomRightCoordinates(
+    menuElement
+  )
   var extremeCoordinates
 
-  function saveMouseCoordinates(x, y) {
+  function saveMouseCoordinates (x, y) {
     previousMouseCoordinates.x = currentMouseCoordinates.x
     previousMouseCoordinates.y = currentMouseCoordinates.y
     currentMouseCoordinates.x = x
     currentMouseCoordinates.y = y
   }
 
-  // Return `true` if there currently isn't an active menu item, or if 
+  // Return `true` if there currently isn't an active menu item, or if
   // `currentMouseCoordinates` is outside of the triangle drawn between
   // `previousMouseCoordinates`, `activeSubMenuTopLeftCoordinates` and
   // `activeSubMenuBottomLeftCoordinates`.
   function shouldChangeActiveMenuItem () {
+    // prettier-ignore
     return (
       !activeMenuItem ||
       calculateGradient(previousMouseCoordinates, activeSubMenuTopLeftCoordinates) <
-        calculateGradient(currentMouseCoordinates, activeSubMenuTopLeftCoordinates) ||
+      calculateGradient(currentMouseCoordinates, activeSubMenuTopLeftCoordinates) ||
       calculateGradient(previousMouseCoordinates, activeSubMenuBottomLeftCoordinates) >
-        calculateGradient(currentMouseCoordinates, activeSubMenuBottomLeftCoordinates)
+      calculateGradient(currentMouseCoordinates, activeSubMenuBottomLeftCoordinates)
     )
   }
 
+  // Possibly activates the given `menuItem`. If so, returns true.
   function possiblyActivateMenuItem (menuItem) {
     cancelPendingMenuItemActivations()
     if (shouldChangeActiveMenuItem()) {
@@ -69,7 +73,9 @@ module.exports = function (menuElement, options) {
     activeMenuItem = menuItem
     activeMenuItem.classList.add(menuItemActiveClassName)
     var activeSubMenu = activeMenuItem.querySelector(menuItemSubMenuSelector)
-    var activeSubMenuCoordinates = calculateExtremeCoordinates(activeSubMenu)
+    var activeSubMenuCoordinates = calculateTopLeftAndBottomRightCoordinates(
+      activeSubMenu
+    )
     activeSubMenuTopLeftCoordinates = {
       x: activeSubMenuCoordinates.x[0],
       y: activeSubMenuCoordinates.y[0]
@@ -78,6 +84,9 @@ module.exports = function (menuElement, options) {
       x: activeSubMenuCoordinates.x[0],
       y: activeSubMenuCoordinates.y[1]
     }
+    // `extremeCoordinates` corresponds to the top-left coordinates (Ax, Ay) and
+    // bottom-right coordinates (Bx, By) of the entire menu, encompassing both the
+    // `menuElement` and `activeSubMenu`.
     extremeCoordinates = {
       x: [
         menuElementCoordinates.x[0],
@@ -91,13 +100,11 @@ module.exports = function (menuElement, options) {
   }
 
   function possiblyDeactivateActiveMenuItem () {
-    var x = currentMouseCoordinates.x
-    var y = currentMouseCoordinates.y
     if (
-      x < extremeCoordinates.x[0] ||
-      x > extremeCoordinates.x[1] ||
-      y < extremeCoordinates.y[0] ||
-      y > extremeCoordinates.y[1]
+      currentMouseCoordinates.x < extremeCoordinates.x[0] ||
+      currentMouseCoordinates.x > extremeCoordinates.x[1] ||
+      currentMouseCoordinates.y < extremeCoordinates.y[0] ||
+      currentMouseCoordinates.y > extremeCoordinates.y[1]
     ) {
       cancelPendingMenuItemActivations()
       deactivateActiveMenuItem()
@@ -109,7 +116,6 @@ module.exports = function (menuElement, options) {
       menuElement.classList.remove(delayingClassName)
       activeMenuItem.classList.remove(menuItemActiveClassName)
       activeMenuItem = null
-      extremeCoordinates = menuElementCoordinates
     }
   }
 
@@ -120,11 +126,12 @@ module.exports = function (menuElement, options) {
   }
 
   function onMenuItemMouseEnter (event) {
-    if (!possiblyActivateMenuItem(event.target)) {
+    var menuItem = event.target
+    if (!possiblyActivateMenuItem(menuItem)) {
       menuElement.classList.add(delayingClassName)
       timeoutId = setTimeout(function () {
         possiblyActivateMenuItem(menuItem)
-      }, delay)      
+      }, delay)
     }
   }
   var menuItems = menuElement.querySelectorAll(menuItemSelector)
