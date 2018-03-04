@@ -14,12 +14,14 @@
     "gzip-size-cli": "^2.1.0",
     "opn-cli": "^3.1.0",
     "prettier-standard": "^8.0.0",
-    "uglify-js": "^3.3.11",
-    "watchify": "^3.10.0"
+    "standard": "^11.0.0",
+    "uglify-js": "^3.3.12",
+    "watchify": "^3.11.0"
   },
   "scripts": {
     "start": "concurrently \"watchify index.js --standalone menuAim --outfile example/bundle.js\" \"ecstatic example --port 8080\" \"opn 'http://0.0.0.0:8080/'\"",
-    "lint": "prettier-standard *.js --no-semi --single-quote --write",
+    "fix": "prettier-standard index.js",
+    "lint": "standard index.js",
     "weight": "uglifyjs index.js --compress --mangle --toplevel | gzip-size"
   },
   "keywords": [
