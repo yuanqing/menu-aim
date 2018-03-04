@@ -29,8 +29,6 @@ module.exports = function (menuElement, options) {
   var activeMenuItem
   var activeSubMenuTopLeftCoordinates
   var activeSubMenuBottomLeftCoordinates
-  var topLeftCoordinates
-  var bottomLeftCoordinates
 
   var menuElementCoordinates = calculateTopLeftAndBottomRightCoordinates(
     menuElement
