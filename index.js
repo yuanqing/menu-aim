@@ -1,9 +1,9 @@
 function calculateTopLeftAndBottomRightCoordinates (element) {
   var rect = element.getBoundingClientRect()
   var topX =
-    rect.left + (window.pageYOffset || document.documentElement.scrollTop)
+    rect.left + (window.pageXOffset || document.documentElement.scrollLeft)
   var topY =
-    rect.top + (window.pageXOffset || document.documentElement.scrollLeft)
+    rect.top + (window.pageYOffset || document.documentElement.scrollTop)
   return {
     x: [topX, topX + element.offsetWidth],
     y: [topY, topY + element.offsetHeight]
