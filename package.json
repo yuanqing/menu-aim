@@ -12,6 +12,8 @@
     "concurrently": "^3.5.1",
     "ecstatic": "^3.2.0",
     "gzip-size-cli": "^2.1.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.1.1",
     "opn-cli": "^3.1.0",
     "prettier-standard": "^8.0.0",
     "standard": "^11.0.0",
@@ -22,7 +24,14 @@
     "start": "concurrently \"watchify index.js --standalone menuAim --outfile example/bundle.js\" \"ecstatic example --port 8080\" \"opn 'http://0.0.0.0:8080/'\"",
     "fix": "prettier-standard index.js",
     "lint": "standard index.js",
+    "precommit": "lint-staged",
     "weight": "uglifyjs index.js --compress --mangle --toplevel | gzip-size"
+  },
+  "lint-staged": {
+    "index.js": [
+      "standard",
+      "git add"
+    ]
   },
   "keywords": [
     "aim",
