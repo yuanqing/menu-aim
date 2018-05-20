@@ -1,9 +1,8 @@
-# menu-aim [![npm Version](http://img.shields.io/npm/v/menu-aim.svg?style=flat)](https://www.npmjs.org/package/menu-aim) [![Build Status](https://img.shields.io/travis/yuanqing/menu-aim.svg?branch=master&style=flat)](https://travis-ci.org/yuanqing/menu-aim) ![Stability Experimental](http://img.shields.io/badge/stability-experimental-red.svg?style=flat)
+# menu-aim [![npm Version](http://img.shields.io/npm/v/menu-aim.svg?style=flat)](https://www.npmjs.org/package/menu-aim) [![Build Status](https://img.shields.io/travis/yuanqing/menu-aim.svg?branch=master&style=flat)](https://travis-ci.org/yuanqing/menu-aim)
 
 > [Instant mega menus](http://bjk5.com/post/44698559168/breaking-down-amazons-mega-dropdown) in vanilla JavaScript.
 
-- Keeps a sub-menu open when the mouse is determined to be enroute to it
-- Otherwise, instantly switches to another item in the menu list
+- Keeps a sub-menu open when the mouse is determined to be enroute to it, else instantly switches to another item in the menu
 - 670 bytes gzipped
 
 ## API
