@@ -23,6 +23,14 @@ module.exports = function (menuElement, options) {
     options.menuItemSubMenuSelector || '.menu-aim__item-submenu'
   var delayingClassName = options.delayingClassName || 'menu-aim--delaying'
 
+  if (!menuElement.querySelector(menuItemSelector)) {
+    throw new Error('No `menuItemSelector` element given')
+  }
+
+  if (!menuElement.querySelector(menuItemSubMenuSelector)) {
+    throw new Error('No `menuItemSubMenuSelector` element given')
+  }
+
   var previousMouseCoordinates = {}
   var currentMouseCoordinates = {}
   var timeoutId
